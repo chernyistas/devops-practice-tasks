@@ -1,0 +1,35 @@
+# ============================================================
+# .gitignore для devops-practice-tasks
+# ============================================================
+
+# Ansible
+*.retry
+*.log
+inventory.ini.save
+*.save
+
+# Секреты и пароли
+*.vault_pass
+vault_pass.txt
+*.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Секреты и пароли
+*.vault_pass
+vault_pass.txt
+*.env
+inventory.ini
+inventory-task1.ini
