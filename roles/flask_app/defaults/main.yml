@@ -1,0 +1,25 @@
+---
+# defaults file for roles/flask_app
+# ============================================================
+# defaults/main.yml — переменные роли flask_app
+# ============================================================
+# Эти переменные можно переопределить в playbook.
+# Приоритет: defaults < vars < playbook vars
+
+# Имя Docker-образа
+flask_image_name: "flask-app"
+
+# Тег образа
+flask_image_tag: "latest"
+
+# Имя контейнера
+flask_container_name: "flask-app"
+
+# Порт, который слушает Flask внутри контейнера
+flask_internal_port: 5000
+
+# Порт на хосте, куда пробрасываем
+flask_host_port: 5000
+
+# Директория на сервере, где лежат файлы приложения
+flask_app_dir: "/opt/flask-app"

@@ -1,0 +1,15 @@
+# ============================================================
+# playbook-task4.yml — запуск Flask в Docker через Ansible
+# ============================================================
+
+---
+- name: Развертывание Flask приложения  в Docker
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    flask_host_port: 5000
+
+  roles:
+    - flask_app

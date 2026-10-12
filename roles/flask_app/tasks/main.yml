@@ -1,0 +1,91 @@
+---
+# tasks file for roles/flask_app
+# ============================================================
+# tasks/main.yml — задачи роли flask_app
+# ============================================================
+
+# 1. Проверить, установлен ли Docker
+- name: Проверить наличие Docker
+  command: docker --version
+  register: docker_check
+  ignore_errors: yes
+  changed_when: false
+
+# 2. Установить Docker, только если его нет
+- name: Установить Docker
+  apt:
+    name: docker.io
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  when: docker_check.rc != 0
+
+# 3. Убедиться, что Docker запущен
+- name: Запустить Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+# 4. Создать директорию для приложения
+- name: Создать дерикторию для приложения
+  file:
+    path: "{{ flask_app_dir }}"
+    state: directory
+    mode: '0755'
+
+# 5. Скопировать файлы приложения
+- name: Скопировать app.py
+  copy:
+    src: app.py
+    dest: "{{ flask_app_dir }}/app.py"
+    mode: '0644'
+
+- name: Скопировать requirements.txt
+  copy:
+    src: requirements.txt
+    dest: "{{ flask_app_dir }}/requirements.txt"
+    mode: '0644'
+
+- name: Скопировать Dockerfile
+  copy:
+    src: Dockerfile
+    dest: "{{ flask_app_dir }}/Dockerfile"
+    mode: '0644'
+
+# 6. Собрать Docker-образ
+- name: Собрать Docker-образ
+  community.docker.docker_image:
+    name: "{{ flask_image_name }}"
+    tag: "{{ flask_image_tag }}"
+    source: build
+    build:
+      path: "{{ flask_app_dir }}"
+    force_source: yes
+  register: image_build
+
+# 7. Запустить контейнер
+- name: Запустить контейнер Flask
+  community.docker.docker_container:
+    name: "{{ flask_container_name }}"
+    image: "{{flask_image_name }}:{{ flask_image_tag }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ flask_host_port }}:{{ flask_internal_port }}"
+  register: container_run
+
+# 8. Проверить, что приложение отвечает
+- name: Проверить Flask через HTTP
+  uri:
+    url: "http://localhost:{{ flask_host_port }}/"
+    return_content: yes
+  register: flask_response
+  until: flask_response.status == 200
+  retries: 5
+  delay: 3
+  ignore_errors: yes
+
+- name: Показать ответ Flask
+  debug:
+    msg: "Flask ответил: {{ flask_response.content | default('недоступен') }}"
